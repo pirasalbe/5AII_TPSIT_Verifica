@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,6 +22,9 @@ import javax.servlet.http.HttpServletResponse;
  * @author pirasalbe
  */
 public class plot extends HttpServlet {
+    private int views = 0;
+    
+    private synchronized void increment() { views++; }
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -34,6 +38,23 @@ public class plot extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+        
+        increment();
+        
+        //my views
+        Cookie[] cookies = request.getCookies();
+        Cookie userCookie = null;
+        String name = request.getParameter("title").replace(" ", "_");
+        int myviews = 1;
+        
+        for(Cookie c : cookies){
+            if(c.getName().equals(name))
+                myviews = Integer.parseInt(c.getValue()) + 1;
+        }
+        
+        userCookie = new Cookie(name, Integer.toString(myviews));
+        userCookie.setMaxAge(60*60*24*31); //Store cookie for 1 m
+        response.addCookie(userCookie);
         
         String query = "select * "
                 + "from (film f inner join regia r on f.IdFilm=r.IdFilm) "
@@ -115,6 +136,17 @@ public class plot extends HttpServlet {
             //come back home
             out.println("<div class='row'>"
                     + "<input type='button' class='btn btn-default' value='Home' onClick=\"javascript:location.href='index.html'\" />"
+                    + "</div>");
+            
+            //views
+            out.println("<br>"
+                    + "<div class='row alert alert-info'>"
+                    + "<div class='col-sm-4'>"
+                    + "Total Views: " + views
+                    + "</div>"
+                    + "<div class='col-sm-4'>"
+                    + "My Views: " + myviews
+                    + "</div>"
                     + "</div>");
             
             out.println("</div>");
