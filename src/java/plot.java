@@ -11,8 +11,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author pirasalbe
  */
-public class findActor extends HttpServlet {
+public class plot extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -38,14 +36,14 @@ public class findActor extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         
         String query = "select * "
-                + "from (film f inner join cast c on c.IdFilm=f.IdFilm)"
-                + "inner join attori a on a.IdAtt=c.IdAtt "
-                + "where a.cognome like '" + request.getParameter("actor") + "%'";
+                + "from (film f inner join regia r on f.IdFilm=r.IdFilm) "
+                + "inner join registi re on re.IdReg=r.IdReg "
+                + "where f.titolo = '" + request.getParameter("title") + "'";
         
         Connection c = null;
         Statement s = null;
         ResultSet r = null;
-        String result = "";
+        String result = "", plot = "", title = "", regia="", cast="";
         
         try{
             Class.forName("com.mysql.jdbc.Driver");
@@ -55,17 +53,40 @@ public class findActor extends HttpServlet {
             //query
             r = s.executeQuery(query);
             
+            //obtain regia and other
             while(r.next()){
-                result += "<form action='plot'>" 
-                                + "<div class='row'>"
-                                    + "<div class='alert alert-info'>"
-                                        + "<div class='col-sm-4'><a href='plot?title=" + r.getString("titolo") + "'>" +  r.getString("titolo") + "</a></div>"
-                                        + "<div class='col-sm-2'>" +  r.getString("genere") + "</div>"
-                                        + "<div class='col-sm-2'>" +  r.getString("annopub") + "</div>"
-                                    + "</div>"
-                            + "</div>"
-                                + "</form>";
+                title = "<div><" + r.getString("titolo") + "'>" +  r.getString("titolo") + " (" +  r.getString("annopub") + ")</div>";
+                plot =  "<div>" +  r.getString("trama") + "</div>";
+                regia += "<div>" +  r.getString("re.nome") + " " + r.getString("re.cognome") + "</div>";
             }
+
+            //obtain cast           
+            
+            query = "select * "
+                + "from (film f inner join cast c on c.IdFilm=f.IdFilm)"
+                + "inner join attori a on a.IdAtt=c.IdAtt "
+                + "where f.titolo = '" + request.getParameter("title") + "'";
+            
+            //query
+            r = s.executeQuery(query);
+            
+            while(r.next()){
+                cast += "<div>" +  r.getString("a.nome") + " " + r.getString("a.cognome") + "</div>";
+            }
+            
+            result += "<div class='row'>"
+                            + "<div class='alert alert-success'>"
+                            + "<div>Regia: </div>"
+                            + regia
+                            + "<br>"
+                            + "<div>Cast: </div>"
+                            + cast
+                            + "<br>"
+                            + "<div>Plot: </div>"
+                            + plot
+                            + "</div>"
+                        + "</div>";
+
         } catch(ClassNotFoundException | SQLException e){
             System.out.println(e); //for debug purpose
             result += e;
@@ -75,7 +96,7 @@ public class findActor extends HttpServlet {
         
         try (PrintWriter out = response.getWriter()) {
             out.println("<head>\n" +
-                        "<title>Movies</title>" +
+                        "<title>Plot</title>" +
                         "<meta charset=\"UTF-8\">" +
                         "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
                         "<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\">" +
@@ -85,7 +106,7 @@ public class findActor extends HttpServlet {
             out.println("<div class='container'>");
             
             out.println("<div class=\"row\">\n" +
-                        "<div class=\"jumbotron text-center\"><h2>Movies with that actor</h2></div>\n" +
+                        "<div class=\"jumbotron text-center\"><h2>" + title + "</h2></div>\n" +
                         "</div>");
             
             //show result query
