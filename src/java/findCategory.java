@@ -82,7 +82,7 @@ public class findCategory extends HttpServlet {
             out.println("<div class='container'>");
             
             out.println("<div class=\"row\">\n" +
-                        "<div class=\"jumbotron text-center\"><h2>Movies with that actor</h2></div>\n" +
+                        "<div class=\"jumbotron text-center\"><h2>Movies of that category</h2></div>\n" +
                         "</div>");
             
             //show result query
@@ -91,6 +91,7 @@ public class findCategory extends HttpServlet {
             //come back home
             out.println("<div class='row'>"
                     + "<input type='button' class='btn btn-default' value='Home' onClick=\"javascript:location.href='index.html'\" />"
+                    + " <input type='button' class='btn btn-default' value='Result not found? Send as a report' onClick=\"javascript:location.href='reportForm.html'\" />"
                     + "</div>");
             
             out.println("</div>");

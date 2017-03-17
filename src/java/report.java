@@ -11,8 +11,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author pirasalbe
  */
-public class findActor extends HttpServlet {
+public class report extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -37,15 +35,11 @@ public class findActor extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         
-        String query = "select * "
-                + "from (film f inner join cast c on c.IdFilm=f.IdFilm)"
-                + "inner join attori a on a.IdAtt=c.IdAtt "
-                + "where a.cognome like '" + request.getParameter("actor") + "%'";
+        String query = "insert into report(title)"
+                + "values('" + request.getParameter("title") + "')";
         
         Connection c = null;
         Statement s = null;
-        ResultSet r = null;
-        String result = "";
         
         try{
             Class.forName("com.mysql.jdbc.Driver");
@@ -53,23 +47,10 @@ public class findActor extends HttpServlet {
             s = c.createStatement();
             
             //query
-            r = s.executeQuery(query);
+            s.executeUpdate(query);
             
-            while(r.next()){
-                result += "<form action='plot'>" 
-                                + "<div class='row'>"
-                                    + "<div class='alert alert-info'>"
-                                        + "<div class='col-sm-4'><a href='plot?title=" + r.getString("titolo") + "'>" +  r.getString("titolo") + "</a></div>"
-                                        + "<div class='col-sm-2'>" +  r.getString("genere") + "</div>"
-                                        + "<div class='col-sm-2'>" +  r.getString("annopub") + "</div>"
-                                    + "</div>"
-                            + "</div>"
-                                + "</form>";
-            }
         } catch(ClassNotFoundException | SQLException e){
             System.out.println(e); //for debug purpose
-            result += e;
-            result += "<br>" + query;
         }
         
         
@@ -85,16 +66,15 @@ public class findActor extends HttpServlet {
             out.println("<div class='container'>");
             
             out.println("<div class=\"row\">\n" +
-                        "<div class=\"jumbotron text-center\"><h2>Movies with that actor</h2></div>\n" +
+                        "<div class=\"jumbotron text-center\">"
+                    + "<h2>Report sent!</h2>"
+                    + "<h4>Thanks for your help</h4>"
+                    + "</div>\n" +
                         "</div>");
-            
-            //show result query
-            out.println(result);
             
             //come back home
             out.println("<div class='row'>"
                     + "<input type='button' class='btn btn-default' value='Home' onClick=\"javascript:location.href='index.html'\" />"
-                    + " <input type='button' class='btn btn-default' value='Result not found? Send as a report' onClick=\"javascript:location.href='reportForm.html'\" />"
                     + "</div>");
             
             out.println("</div>");
@@ -104,7 +84,6 @@ public class findActor extends HttpServlet {
         } finally {
             try {
             //free memory
-                if (r!=null) r.close();
                 if(s!=null) s.close();
                 if(c !=null) c.close();
             } catch (SQLException e) {
