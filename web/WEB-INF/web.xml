@@ -8,6 +8,10 @@
         <servlet-name>plot</servlet-name>
         <servlet-class>plot</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>findCategory</servlet-name>
+        <servlet-class>findCategory</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>findActor</servlet-name>
         <url-pattern>/findActor</url-pattern>
@@ -15,6 +19,10 @@
     <servlet-mapping>
         <servlet-name>plot</servlet-name>
         <url-pattern>/plot</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>findCategory</servlet-name>
+        <url-pattern>/findCategory</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
